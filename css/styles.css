@@ -1,0 +1,12 @@
+body {
+	margin: 0;
+	background: #000;
+	color: #fff;
+	font-family: helvetica, arial, verdana, sans-serif;
+}
+#container {
+    margin: 0 auto;
+    width: 800px;
+    border: 1px solid #333;
+    text-align: center;
+}
