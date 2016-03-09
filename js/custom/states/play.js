@@ -5,12 +5,13 @@ define([
     function Play() {}
     Play.prototype = {
         constructor: Play,
+        parentPosition: null,
         dragUpdate: function(sprite, pointer, dragX, dragY, snapPoint) {
             if (!this.parentPosition) {
-                this.parentPosition = {
-                    x: this.parent.x,
-                    y: this.parent.y
-                };
+                this.parentPosition = new Phaser.Point(
+                    this.parent.x,
+                    this.parent.y
+                );
             }
             var spriteWidth = 32;
             this.parent.x = this.parentPosition.x + (dragX - spriteWidth);
@@ -34,9 +35,6 @@ define([
             this.parent = this.game.add.sprite(200, 200, bmd);
             this.parent.inputEnabled = true;
             this.parent.input.enableDrag();
-
-            this.parentPosition = null;
-
             // create a new bitmap data object
             var bmd = this.game.add.bitmapData(64,64);
             // draw to the canvas context like normal
@@ -54,8 +52,14 @@ define([
             child.events.onDragUpdate.add(this.dragUpdate, this);
             child.events.onDragStop.add(this.dragStop, this);
             child.events.onInputUp.add(function() {
-                // At this point you can use distance to determine whether the user is clicking or dragging
-                console.log('You clicked on the child sprite.');
+                var distance = this.parentPosition.distance(this.parent.position);
+                var threshold = 4;
+                console.log('distance: ', distance);
+                if (distance >= threshold) {
+                    console.log('User is dragging.');
+                } else {
+                    console.log('User is clicking.');
+                }
             }, this);
         }
     };
