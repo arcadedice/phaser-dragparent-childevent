@@ -1,7 +1,8 @@
 define([
     'phaser'
-], function (Phaser) {
+], function(Phaser) {
     'use strict';
+
     function Play() {}
     Play.prototype = {
         constructor: Play,
@@ -20,47 +21,54 @@ define([
         dragStop: function() {
             this.parentPosition = null;
         },
-        create: function create() {
+        inputUp: function() {
+            var distance = this.parentPosition.distance(this.parent.position);
+            var threshold = 4;
+            console.log('distance: ', distance);
+            if (distance >= threshold) {
+                console.log('User is dragging.');
+            } else {
+                console.log('User is clicking.');
+            }
+        },
+        getBitmapData: function(width, height, color) {
+            var bmd = this.game.add.bitmapData(width, height);
+            bmd.ctx.beginPath();
+            bmd.ctx.rect(0, 0, width, height);
+            bmd.ctx.fillStyle = color;
+            bmd.ctx.fill();
+            return bmd;
+        },
+        addBackground: function() {
             var background = this.game.add.sprite(0, 0, 'background');
             background.width = this.game.width;
             background.height = this.game.height;
-            // create a new bitmap data object
-            var bmd = this.game.add.bitmapData(128,128);
-            // draw to the canvas context like normal
-            bmd.ctx.beginPath();
-            bmd.ctx.rect(0,0,128,128);
-            bmd.ctx.fillStyle = '#ff0000';
-            bmd.ctx.fill();
-            // use the bitmap data as the texture for the sprite
+        },
+        addParent: function() {
+            var bmd = this.getBitmapData(128, 128, '#ff0000');
             this.parent = this.game.add.sprite(200, 200, bmd);
             this.parent.inputEnabled = true;
             this.parent.input.enableDrag();
-            // create a new bitmap data object
-            var bmd = this.game.add.bitmapData(64,64);
-            // draw to the canvas context like normal
-            bmd.ctx.beginPath();
-            bmd.ctx.rect(0,0,64,64);
-            bmd.ctx.fillStyle = '#ffff00';
-            bmd.ctx.fill();
-            // use the bitmap data as the texture for the sprite
-            var child = this.parent.addChild(this.game.add.sprite(32, 32, bmd));
-            child.inputEnabled = true;
-            child.input.priorityID = 1;
-            child.inputEnabled = true;
-            child.input.setDragLock(false, false);
-            child.input.enableDrag();
-            child.events.onDragUpdate.add(this.dragUpdate, this);
-            child.events.onDragStop.add(this.dragStop, this);
-            child.events.onInputUp.add(function() {
-                var distance = this.parentPosition.distance(this.parent.position);
-                var threshold = 4;
-                console.log('distance: ', distance);
-                if (distance >= threshold) {
-                    console.log('User is dragging.');
-                } else {
-                    console.log('User is clicking.');
-                }
-            }, this);
+        },
+        addChild: function() {
+            var bmd = this.getBitmapData(64, 64, '#ffff00');
+            this.child = this.parent.addChild(this.game.add.sprite(32, 32, bmd));
+            this.child.inputEnabled = true;
+            this.child.input.priorityID = 1;
+            this.child.input.pixelPerfectClick = true;
+            this.child.input.setDragLock(false, false);
+            this.child.input.enableDrag(false, false, true);
+        },
+        addEventListeners: function() {
+            this.child.events.onDragUpdate.add(this.dragUpdate, this);
+            this.child.events.onDragStop.add(this.dragStop, this);
+            this.child.events.onInputUp.add(this.inputUp, this);
+        },
+        create: function create() {
+            this.addBackground();
+            this.addParent();
+            this.addChild();
+            this.addEventListeners();
         }
     };
     return Play;
