@@ -7,6 +7,7 @@ define([
     Play.prototype = {
         constructor: Play,
         parentPosition: null,
+        childOffset: null,
         dragUpdate: function(sprite, pointer, dragX, dragY, snapPoint) {
             if (!this.parentPosition) {
                 this.parentPosition = new Phaser.Point(
@@ -14,9 +15,8 @@ define([
                     this.parent.y
                 );
             }
-            var spriteWidth = 32;
-            this.parent.x = this.parentPosition.x + (dragX - spriteWidth);
-            this.parent.y = this.parentPosition.y + (dragY - spriteWidth);
+            this.parent.x = this.parentPosition.x + (dragX - this.childOffset.x);
+            this.parent.y = this.parentPosition.y + (dragY - this.childOffset.y);
         },
         dragStop: function() {
             this.parentPosition = null;
@@ -52,7 +52,11 @@ define([
         },
         addChild: function() {
             var bmd = this.getBitmapData(64, 64, '#ffff00');
-            this.child = this.parent.addChild(this.game.add.sprite(32, 32, bmd));
+            this.childOffset = new Phaser.Point(
+                32,
+                32
+            );
+            this.child = this.parent.addChild(this.game.add.sprite(this.childOffset.x, this.childOffset.y, bmd));
             this.child.inputEnabled = true;
             this.child.input.priorityID = 1;
             this.child.input.pixelPerfectClick = true;
